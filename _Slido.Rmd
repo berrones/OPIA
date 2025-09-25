@@ -1,0 +1,342 @@
+# ajb
+
+```{r settings}
+
+source("../../Sandbox/adam-utils/sysOpsLibsFuncs.R")
+
+
+
+set.seed(1234)
+
+library(wordcloud)
+# library(openxlsx)
+```
+
+
+
+```{r db}
+
+con <- dbConnect(
+  odbc::odbc(),
+  Driver = "PostgreSQL ANSI",
+  Database = 'ajb',
+  UID = 'postgres',
+  PWD = 'Qwer!234',
+  Port = 5432,
+  timeout = 10
+)
+
+message('printing dB info..'); dbGetInfo(con)
+
+message('printing dB objects..'); dbListObjects(con)
+
+message('printing dB tables..'); dbListTables(con)
+
+# dbDisconnect(con)
+
+```
+
+
+
+```{r}
+pollsOverall <- read_xlsx(
+  '2025data/Polls-overall-SHIP_9-17-25.xlsx'
+) %>% 
+  mutate(
+    `Poll ID` = as_factor(`Poll ID`),
+    prop = Count / `Total Votes`
+  )
+
+
+findMyQuestion <- function(question) {
+  pollsOverall %>% 
+    filter(str_detect(`Poll Question`, question))
+}
+```
+
+```{r}
+
+q1 <- findMyQuestion('How satisfied are you with the progress made on the access to care goals')
+
+q1 %>% 
+  ggplot() +
+  geom_col(
+    aes(reorder(
+      `Poll Option`,
+      -prop),
+      prop,
+      fill = `Poll Option`
+    ), show.legend = F
+  ) +
+  geom_label(aes(`Poll Option`, prop,label = Results)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = NULL,
+    y = 'Proportion'
+  ) +
+  scale_fill_manual('', values = c(
+    chfs$cols5[3],
+    chfs$cols5[2],
+    chfs$cols5[1],
+    chfs$cols5[4],
+    chfs$cols5[4]
+    )) +
+  theme_gray(base_size = 12) +
+  theme(
+    axis.text = element_text(color = 'black'),
+    panel.background = element_rect(fill = 'white')
+  )
+
+q1b <- findMyQuestion('Please describe why you selected your satisfaction level for access to care?')
+
+wordcloud(
+  words = q1b$`Poll Option`,
+  # freq = q1b$Count,
+  min.freq = 2,
+  rot.per = 0.35,
+  colors = chfs$cols9[3:7]
+  # colors=brewer.pal(8,'Dark2')
+  )
+
+df_into_clip( q1b$`Poll Option`)
+```
+
+
+
+```{r}
+
+q2 <- findMyQuestion('thoughts for the Mental Health team')
+df_into_clip( q2$`Poll Option`)
+
+# q2$paint <- c('None', 'Kick off meeting', 'Workgroup', 'Multiple workgroups', 'Workgroup Chair', 'Contributed Data', 'Presented at workgroup')
+# 
+# q2 %>% 
+#   ggplot() +
+#   geom_col(
+#     aes(reorder(
+#       paint,
+#       -prop),
+#       prop,
+#       fill = paint
+#     ), show.legend = F
+#   ) +
+#   geom_label(aes(paint, prop,label = Results)) +
+#   scale_y_continuous(labels = scales::percent) +
+#   labs(
+#     x = NULL,
+#     y = 'Proportion'
+#   ) +
+#   scale_fill_manual('', values = 
+#                       c(
+#                         chfs$cols7[5],
+#                         chfs$cols7[2],
+#                         chfs$cols7[4],
+#                         chfs$cols7[3],
+#                         chfs$cols7[7],
+#                         chfs$cols7[1],
+#                         chfs$cols7[6]
+#                       )
+#                     ) +
+#   theme_gray(base_size = 18) +
+#   theme(
+#     axis.text = element_text(color = 'black'),
+#     panel.background = element_rect(fill = 'white'),
+#     axis.text.x = element_text(angle = 35, vjust = .75, size = 14)
+#   )
+
+
+
+
+```
+
+
+
+```{r}
+
+q3 <- findMyQuestion('How satisfied are you with the progress made on the smoking')
+
+q3 %>% 
+  ggplot() +
+  geom_col(
+    aes(reorder(
+      `Poll Option`,
+      -prop),
+      prop,
+      fill = `Poll Option`
+    ), show.legend = F
+  ) +
+  geom_label(aes(`Poll Option`, prop,label = Results)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = NULL,
+    y = 'Proportion'
+  ) +
+  scale_fill_manual('', values = c(
+    chfs$cols5[5],
+    chfs$cols5[2],
+    chfs$cols5[1],
+    chfs$cols5[3],
+    chfs$cols5[4]
+    )) +
+  theme_gray(base_size = 12) +
+  theme(
+    axis.text = element_text(color = 'black'),
+    panel.background = element_rect(fill = 'white')
+  )
+
+# wordcloud(
+#   words = q3$`Poll Option`, 
+#   # freq = q1b$Count,
+#   min.freq = 1,
+#   rot.per = 0.35,
+#   colors = chfs$cols9[3:7]
+#   # colors=brewer.pal(8,'Dark2')
+#   )
+# 
+
+q3b <- findMyQuestion('Please describe why you selected your satisfaction level for smokin')
+
+df_into_clip(q3b$`Poll Option`)
+
+
+```
+
+
+
+```{r}
+
+
+q4 <- findMyQuestion('How satisfied are you with the progress made on the nutrition goals in the first year of the five')
+
+q4 %>% 
+  ggplot() +
+  geom_col(
+    aes(reorder(
+      `Poll Option`,
+      -prop),
+      prop,
+      fill = `Poll Option`
+    ), show.legend = F
+  ) +
+  geom_label(aes(`Poll Option`, prop,label = Results)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = NULL,
+    y = 'Proportion'
+  ) +
+  scale_fill_manual('', values = c(
+    chfs$cols5[1],
+    chfs$cols5[4],
+    chfs$cols5[1],
+    chfs$cols5[4],
+    chfs$cols5[5]
+    )) +
+  theme_gray(base_size = 12) +
+  theme(
+    axis.text = element_text(color = 'black'),
+    panel.background = element_rect(fill = 'white'),
+    axis.text.x = element_text(angle = 15, vjust = .5, size = 14)
+  )
+
+q4b <- findMyQuestion('Please describe why you selected your satisfaction level for nutrition')
+df_into_clip(q4b$`Poll Option`)
+```
+
+
+
+```{r}
+
+
+q5 <- findMyQuestion('How satisfied are you with the progress made on the drug use goals in the first year of the')
+
+
+q5 %>% 
+  ggplot() +
+  geom_col(
+    aes(reorder(
+      `Poll Option`,
+      -prop),
+      prop,
+      fill = `Poll Option`
+    ), show.legend = F
+  ) +
+  geom_label(aes(`Poll Option`, prop,label = Results)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = NULL,
+    y = 'Proportion'
+  ) +
+  scale_fill_manual('', values = c(
+    chfs$cols5[1],
+    chfs$cols5[4],
+    chfs$cols5[1],
+    chfs$cols5[4],
+    chfs$cols5[5]
+    )) +
+  theme_gray(base_size = 12) +
+  theme(
+    axis.text = element_text(color = 'black'),
+    panel.background = element_rect(fill = 'white'),
+    axis.text.x = element_text(angle = 15, vjust = .5, size = 14)
+  )
+# 
+# wordcloud(
+#   words = q5$`Poll Option`, 
+#   # freq = q1b$Count,
+#   min.freq = 1,
+#   rot.per = 0.35,
+#   colors = chfs$cols9[3:7]
+#   # colors=brewer.pal(8,'Dark2')
+#   )
+
+q5b <- findMyQuestion("Please describe why you selected your satisfaction level for dru")
+
+df_into_clip(q5b$`Poll Option`)
+
+
+```
+
+```{r}
+
+q6 <- findMyQuestion('Are there ways that you are already implementing Nutrition SHIP goals or are there ways your work aligns with the Nutrition SHIP goals\\? Please describe and include your organization.')
+
+wordcloud(
+  words = q6$`Poll Option`, 
+  # freq = q1b$Count,
+  min.freq = 2,
+  rot.per = 0.35,
+  colors = chfs$cols9[3:7]
+  # colors=brewer.pal(8,'Dark2')
+  )
+
+q6$`Poll Option` %>% df_into_clip()
+
+```
+
+```{r}
+q7 <- findMyQuestion('What strategies do you use to currently engage the Drug Use SHIP goals through your work\\?')
+q7$`Poll Option` %>% df_into_clip()
+```
+
+
+```{r}
+q8 <- findMyQuestion('What resources\\/collaborations would support alignment with Drug Use SHIP goals within your respective agency\\/organization\\?')
+q8$`Poll Option` %>% df_into_clip()
+```
+
+```{r}
+q9 <- findMyQuestion('What are you going to do tomorrow in your organization to start working on the State Health Improvement Plan')
+
+wordcloud(
+  words = q9$`Poll Option`, 
+  # freq = q1b$Count,
+  min.freq = 1,
+  rot.per = 0.35,
+  colors = chfs$cols9[3:7]
+  # colors=brewer.pal(8,'Dark2')
+  )
+
+df_into_clip(q9$`Poll Option`)
+```
+
+
